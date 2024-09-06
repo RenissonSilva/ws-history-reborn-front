@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import Paper from '@mui/material/Paper';
 import CheckIcon from '@mui/icons-material/Check';
-import api from './services/api';
-import { Table, TableHead, TableBody, TableRow, TableCell, TextField, Button, TableContainer } from '@mui/material';
+import DeleteIcon from '@mui/icons-material/Delete';
+import { Table, TableHead, TableBody, TableRow, TableCell, TextField, Button, TableContainer, Box } from '@mui/material';
 import { Bounce, ToastContainer, toast } from 'react-toastify';
-  import 'react-toastify/dist/ReactToastify.css';
+import api from './services/api';
+import 'react-toastify/dist/ReactToastify.css';
+import ItemForm from './components/itemForm';
 
 interface Item {
   id: number,
@@ -19,6 +21,13 @@ interface Item {
 export default function Home() {
   const [items, setItems] = useState<Item[]>([])
   const [editableItems, setEditableItems] = useState(items);
+  const [newItem, setNewItem] = useState({
+    item_id: null,
+    name: null,
+    refinement: null,
+    price: null
+  });
+  
 
   const getItems = async () => {
     try {
@@ -38,6 +47,29 @@ export default function Home() {
         )
       );
     };
+    
+    // Manipulador de submissão do formulário
+    const handleSubmitSave = async (event) => {
+      event.preventDefault();
+
+      try {
+        await api.post('/items', newItem);
+
+        toast.success('Criado com sucesso!');
+
+        setNewItem({
+          item_id: '',
+          name: '',
+          refinement: '',
+          price: ''
+        })
+
+        getItems();
+        
+      } catch (error) {
+        toast.error(error.response.data ?? 'Erro ao criar dados.');
+      }
+    };
 
     // Manipulador de submissão do formulário
     const handleSubmit = async (event) => {
@@ -47,32 +79,34 @@ export default function Home() {
         // Substitua pela URL do seu backend
         await api.put('/items', editableItems);
         console.log('sucesso')
-        toast.success('Dados atualizados com sucesso!', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Bounce,
-        });
+        toast.success('Dados atualizados com sucesso!');
       } catch (error) {
         console.error('Erro ao atualizar dados:', error);
-        toast.error('Erro ao atualizar dados.', {
-          position: "top-right",
-          autoClose: 5000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "dark",
-          transition: Bounce,
-        });
+        toast.error('Erro ao atualizar dados.');
       }
     };
+
+    const handleDeleteClick = (id) => {
+      // Exibe o prompt de confirmação
+      const confirmed = window.confirm('Você tem certeza que deseja deletar este item?');
+  
+      // Se o usuário confirmar, chama a função de deletar
+      if (confirmed) {
+        onDelete(id);
+      }
+    };
+
+    const onDelete  = async (id) => {
+      try {
+        await api.delete('/items/'+id);
+        toast.success('Deletado com sucesso!')
+        
+        getItems();
+      } catch (err) {
+        toast.success('Ocorreu um erro!')
+        console.error('Erro:', err);
+      }
+    }
 
   useEffect(() => {
     getItems()
@@ -82,6 +116,11 @@ export default function Home() {
     <div className="gritem_id grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
       <ToastContainer />
       <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
+        <ItemForm
+          newItem={newItem}
+          setNewItem={setNewItem}
+          handleSubmitSave={handleSubmitSave}
+        />
         <TableContainer component={Paper}>
           <form onSubmit={handleSubmit}>
             <Table sx={{ minWidth: 650 }} aria-label="simple table" className="bg-[#393939]">
@@ -91,6 +130,7 @@ export default function Home() {
                   <TableCell className="text-white">Nome</TableCell>
                   <TableCell className="text-white">Refino</TableCell>
                   <TableCell className="text-white">Preço</TableCell>
+                  <TableCell className="text-white"></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -153,6 +193,11 @@ export default function Home() {
                         }}
                         onChange={(e) => handleInputChange(row.id, row.item_id, 'price', e.target.value)}
                       />
+                    </TableCell>
+                    <TableCell className="text-gray-300">
+                      <Button onClick={() => handleDeleteClick(row.id)}>
+                        <DeleteIcon sx={{ color: '#f86b6b' }}/>
+                      </Button>
                     </TableCell>
                   </TableRow>
                 ))}
