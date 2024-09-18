@@ -22,10 +22,10 @@ export default function Home() {
   const [items, setItems] = useState<Item[]>([])
   const [editableItems, setEditableItems] = useState(items);
   const [newItem, setNewItem] = useState({
-    item_id: null,
-    name: null,
-    refinement: null,
-    price: null
+    item_id: '',
+    name: '',
+    refinement: '',
+    price: ''
   });
   
 
@@ -40,7 +40,7 @@ export default function Home() {
   };
 
     // Atualiza o estado com os novos valores dos campos de entrada
-    const handleInputChange = (id, item_id, field, value) => {
+    const handleInputChange = (id: number, item_id: number, field: string, value: string) => {
       setEditableItems(prevItems =>
         prevItems.map(item =>
           item.id === id ? { ...item, [field]: value } : item
@@ -49,7 +49,7 @@ export default function Home() {
     };
     
     // Manipulador de submissão do formulário
-    const handleSubmitSave = async (event) => {
+    const handleSubmitSave = async (event: { preventDefault: () => void; }) => {
       event.preventDefault();
 
       try {
@@ -72,7 +72,7 @@ export default function Home() {
     };
 
     // Manipulador de submissão do formulário
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event: { preventDefault: () => void; }) => {
       event.preventDefault();
 
       try {
@@ -86,7 +86,7 @@ export default function Home() {
       }
     };
 
-    const handleDeleteClick = (id) => {
+    const handleDeleteClick = (id: number) => {
       // Exibe o prompt de confirmação
       const confirmed = window.confirm('Você tem certeza que deseja deletar este item?');
   
@@ -96,7 +96,7 @@ export default function Home() {
       }
     };
 
-    const onDelete  = async (id) => {
+    const onDelete  = async (id: string | number) => {
       try {
         await api.delete('/items/'+id);
         toast.success('Deletado com sucesso!')
