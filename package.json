@@ -4,9 +4,9 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
+    "build": "next build && npx tailwindcss -i ./src/app/globals.css -o ./src/app/globals.css",
     "start": "next start",
-    "lint": "next lint",
-    "build": "npx tailwindcss -i ./src/app/globals.css -o ./src/app/globals.css"
+    "lint": "next lint"
   },
   "dependencies": {
     "@emotion/react": "^11.13.3",
