@@ -18,6 +18,12 @@ interface Item {
   price: number,
 }
 
+interface AxiosError {
+  response?: {
+    data?: string;
+  };
+}
+
 export default function Home() {
   const [items, setItems] = useState<Item[]>([])
   const [editableItems, setEditableItems] = useState(items);
@@ -67,12 +73,13 @@ export default function Home() {
         getItems();
         
       } catch (error: unknown) {
-        if (error instanceof Error && (error as any).response?.data) {
-          // Se 'error' tem 'response' e 'data'
-          toast.error((error as any).response.data ?? 'Erro ao criar dados.');
+        const typedError = error as AxiosError;
+        if (typedError.response?.data) {
+          toast.error(typedError.response.data ?? 'Erro ao criar dados.');
+        } else if (error instanceof Error) {
+          toast.error(error.message);
         } else {
-          // Caso o erro não seja o esperado
-          toast.error('Erro ao criar dados.');
+          toast.error('Erro desconhecido.');
         }
       }
     };
