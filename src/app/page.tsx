@@ -66,8 +66,14 @@ export default function Home() {
 
         getItems();
         
-      } catch (error) {
-        toast.error(error.response.data ?? 'Erro ao criar dados.');
+      } catch (error: unknown) {
+        if (error instanceof Error && (error as any).response?.data) {
+          // Se 'error' tem 'response' e 'data'
+          toast.error((error as any).response.data ?? 'Erro ao criar dados.');
+        } else {
+          // Caso o erro não seja o esperado
+          toast.error('Erro ao criar dados.');
+        }
       }
     };
 
